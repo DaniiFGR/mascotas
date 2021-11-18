@@ -322,6 +322,10 @@ p {
     background: #191a1c;
     margin-left: 30px;
 }
+.img-afuera{
+    width: 450px !important;
+    height: 300px !important;
+}
 
 .thumbnail .more {
     display: block;
@@ -1275,7 +1279,7 @@ a {
 
 .fondo {
     background-image: url("../img/img2.jpg");
-    height: 1000px;
+    height: 1250px;
 }
 
 .form-style .fomulario {

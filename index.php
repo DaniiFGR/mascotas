@@ -23,6 +23,7 @@
   <link rel="stylesheet" type="text/css" href="css/jquery.bxslider.css" />
   <link rel="stylesheet" type="text/css" href="css/animate.css" />
   <link rel="shortcut icon" href="images/ico/icon1.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">
 </head>
 
 <body>
@@ -30,6 +31,7 @@
     include 'procesar.php';
     $mascotasObj = new Mascotas();
     $mascotas = $mascotasObj->mostrar();
+    $contador= $mascotasObj->contar();
   ?>
   <div class="navbar navbar-fixed-top animated fadeInDown row">
     <div class="navbar-inner">
@@ -186,6 +188,13 @@
       <div id="single-project" class="row">
         <?php
           foreach ($mascotas as $reg) {
+            $band = 0;
+            foreach($contador as $cont){
+              if($cont['mascota_id'] == $reg['id_mas']){
+                $band = $cont['num'];
+
+              }
+            }
         ?>
           <div id="<?php echo $reg["id_mas"]?>" class="toggleDiv row-fluid single-project listado">
             <div class="span6">
@@ -201,10 +210,17 @@
                 </div>
                 <div class="project-info">
                   <div>
-                    <span><h4>Edad</h4></span><?php echo $reg['edad']?>
+                    <span><h4>Edad</h4></span>
+                    <?php
+                    echo floor(($reg['edad'] / 12))." Años y ".($reg['edad'] % 12)." meses";
+                    ?>
                   </div>
                   <div class="espacio">
                     <span><h4>Raza</h4></span><?php echo $reg['raza']?>
+                  </div>
+                  <div class="espacio">
+                    <span><h4>Solicitudes</h4></span><?php if($band != 0) echo "$band <i class='bi bi-suit-heart'></i>"?>
+                    
                   </div>
                   <div class="espacio">
                     <span><h4>Comentarios</h4></span>
@@ -223,18 +239,27 @@
           <ul id="portfolio-grid" class="thumbnails row">
             <?php
               foreach ($mascotas as $reg) {
+                if($reg['estado'] == 'Activo'){
+                  $band = 0;
+                  foreach($contador as $cont){
+                    if($cont['mascota_id'] == $reg['id_mas']){
+                      $band = $cont['num'];
+
+                    }
+                  }
             ?>
               <li class="span4 mix <?php echo $reg['especie']?>">
                 <div class="thumbnail">
-                  <img src="images/<?php echo $reg["imagen"]?>" alt="...">
+                  <img src="images/<?php echo $reg["imagen"]?>" alt="..." class="img-afuera">
                   <a href="#single-project" class="more show_hide" rel="#<?php echo $reg["id_mas"]?>">
                     <i class="icon-plus"></i>
                   </a>
-                  <h3><?php echo $reg["nombre"]?></h3>
+                  <span></span>
+                  <h3><?php echo $reg["nombre"]?><?php if($band != 0) echo "<span style='margin-left: 80px'> $band <i class='bi bi-suit-heart'></i></span>"?></h3>
                   <div class="mask"></div>
                 </div>
               </li>
-            <?php }?>
+            <?php }}?>
           </ul>
       </div>
     </div>

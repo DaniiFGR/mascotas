@@ -103,17 +103,204 @@ $(document).ready(() => {
   $('body').on('click', '.btn-actualizar', function () {
     let act = this.dataset.id;
 
-    var esperar = 200;
     console.log("actualizar: ", act);
+    var esperar = 200;
     $.ajax({
       type: "POST",
       data: { "actu": act },
       url: "../procesar.php",
+      dataType: "json",
       success: function (datos) {
         setTimeout(function () {
-          console.log("datos");
+          var items = [];
+          $.each( datos, function( key, val ) {
+            items[key]=val;
+          });
+          console.log(items)
+          $(".id_mas").val(items['id_mas']);
+          $(".nom_mas").val(items['nombre']);
+          $(".raza_mas").val(items['raza']);
+          $(".especie_mas").text(items['especie']);
+          $(".especie_mas").val(items['especie_id']);
+          $(".cmt_mas").val(items['comentarios']);
+          $(".estado_id_mas").val(items['estado_elemento_id']);
+          let edad = items['edad'];
+          let anio = edad / 12;
+          let mes = edad % 12
+          $(".e_anio_mas").text(Math.trunc(anio));
+          $(".e_mes_mas").text(Math.trunc(mes));
+          $(".img_mas").text(items['imagen']);
+        }, esperar);
+      },
+      error: function () {
+        setTimeout(function () {
+          console.log("Error")
+        }, esperar);
+      },
+    });
+  });
+
+  $('body').on('click', '.btn-update', function () {
+    var esperar = 200;
+    var pos = (($("#id_mas_act").val()));
+    var img = $("#imagen_mas_act").val()
+    fic = img.split('\\');
+    fic = fic[fic.length-1];
+    console.log("imagen", img)
+    console.log("posicion: ",pos);
+    $.ajax({
+      type: "POST",
+      data: {"updt": 1, "id_mas": $("#id_mas_act").val(),"nombre": $("#nombre_mas_act").val(),"anio": $("#edad_anio_mas_act").val(),"mes": $("#edad_mes_mas_act").val(), "imagen": fic, "raza": $("#raza_mas_act").val(), "especie": $("#especie_mas_act").val(),"comentarios": $("#comentario_mas_act").val(), "estado": $("#estado_id").val()},
+      // data: $("#form_actualizar_mas").serialize(),
+      url: "../procesar.php",
+      dataType: "json",
+      success: function (datos) {
+        setTimeout(function () {
+          var items = [];
+          $.each( (datos), function( key, val ) {
+            items[key]=val;
+          });
+          console.log(items)
+          Swal.fire(
+            'Correcto',
+            'Se Actualizo correctamente',
+            'success'
+          );
+          document.getElementById("pos_n"+pos).innerHTML = items['nombre'];
+          document.getElementById("pos_e"+pos).innerHTML = Math.trunc((items['edad'])/12)+" Años y "+Math.trunc((items['edad'])%12)+" meses";
+          document.getElementById("pos_img"+pos).innerHTML = "<img src='../images/"+items['imagen']+"' alt='..' class='img-datatable'>";
+          document.getElementById("pos_r"+pos).innerHTML = "<a style='color: black;' href='"+items['url_raza']+"'><i class='bi bi-link-45deg'></i>"+items['raza']+"</a>";
+          let s_pos="#pos"+pos;
+          console.log(s_pos);
+          document.getElementById("pos"+pos).innerHTML = items['comentarios'];
+        }, esperar);
+      },
+      error: function () {
+        setTimeout(function () {
+          Swal.fire(
+            'Error',
+            'No se Actualizo',
+            'error'
+          )
+        }, esperar);
+      },
+    });
+  });
+
+  $('body').on('click', '.btn-eliminar_raza', function () {
+    let id = this.dataset.estado;
+    console.log("siiii: ", id);
+    var esperar = 200;
+    var valor= this;
+    console.log(valor);
+    $.ajax({
+      type: "POST",
+      data: { "elim_raza": id },
+      url: "../procesar.php",
+      success: function (datos) {
+        setTimeout(function () {
+          if (datos == 1) {
+            Swal.fire(
+              'Correcto',
+              'Se desactivo de forma correcta',
+              'success'
+            );
+            valor.classList.remove("btn-danger");
+            valor.classList.add("btn-secondary");
+            valor.innerHTML = '<i class="bi bi-check-lg"></i>';
+          } else {
+            if (datos == 2) {
+              Swal.fire(
+                'Correcto',
+                'Se Activo de forma correcta',
+                'success'
+              );
+              valor.classList.remove("btn-secondary");
+              valor.classList.add("btn-danger");
+              valor.innerHTML = '<i class="bi bi-trash"></i>';
+            }else{
+              Swal.fire(
+                'Error',
+                'No se desactivo',
+                'error'
+              )
+            }
+          }
+        }, esperar);
+      },
+    });
+  });
+
+  $('body').on('click', '.btn-actualizar_raza', function () {
+    let act = this.dataset.id;
+
+    console.log("actualizar: ", act);
+    var esperar = 200;
+    $.ajax({
+      type: "POST",
+      data: { "actu_raza": act },
+      url: "../procesar.php",
+      dataType: "json",
+      success: function (datos) {
+        setTimeout(function () {
+          var items = [];
+          $.each( datos, function( key, val ) {
+            items[key]=val;
+          });
+          console.log(items)
+          $(".id_raza").val(items['id']);
+          $(".nom_raza").val(items['raza']);
+          $(".url_raza").val(items['url_raza']);
+        }, esperar);
+      },
+      error: function () {
+        setTimeout(function () {
+          console.log("Error")
+        }, esperar);
+      },
+    });
+  });
+
+  $('body').on('click', '.btn-update_raza', function () {
+    var esperar = 200;
+    var pos = (($("#id_raza_act").val()));
+    console.log("posicion: ",pos);
+    $.ajax({
+      type: "POST",
+      data: {"updt_raza": 1, "id_raza": $("#id_raza_act").val(),"nombre_raza": $("#nombre_raza_act").val(),"url_raza": $("#url_raza_act").val()},
+      // data: $("#form_actualizar_mas").serialize(),
+      url: "../procesar.php",
+      dataType: "json",
+      success: function (datos) {
+        setTimeout(function () {
+          var items = [];
+          $.each( (datos), function( key, val ) {
+            items[key]=val;
+          });
+          console.log(items)
+          Swal.fire(
+            'Correcto',
+            'Se Actualizo correctamente',
+            'success'
+          );
+          document.getElementById("pos_r_n"+pos).innerHTML = items['raza'];
+          document.getElementById("pos_r_u"+pos).innerHTML = "<a href='"+items['url']+"'>"+items['url']+"</a>";
+        }, esperar);
+      },
+      error: function () {
+        setTimeout(function () {
+          Swal.fire(
+            'Error',
+            'No se Actualizo',
+            'error'
+          )
         }, esperar);
       },
     });
   });
 });
+
+
+function nombre(fic) {
+  
+}

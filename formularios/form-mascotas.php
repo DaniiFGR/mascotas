@@ -8,12 +8,8 @@ $especies = $mascotasObj->mostrar_esp();
 if (isset($_POST['submit'])) {
   $mascotasObj->insertar_mas($_POST);
 }
-if (isset($_GET['id']) && !empty($_GET['id'])) {
-  $editId = $_GET['id'];
-  $registro = $registroObj->mostrar_uno($editId);
-}
 if (isset($_POST['update'])) {
-  $registroObj->actualizar($_POST);
+  $mascotasObj->actualizar_mas($_POST);
 }
 ?>
 <div class="fondo">
@@ -27,6 +23,7 @@ if (isset($_POST['update'])) {
       <div class="datatable">
         <table id="example" class="table table-striped" style="width:100%">
           <thead>
+            <th>No.</th>
             <th>Imagen</th>
             <th>Nombre</th>
             <th>edad</th>
@@ -35,13 +32,17 @@ if (isset($_POST['update'])) {
           </thead>
           <tbody>
             <?php
+            $pos = 1;
             foreach ($mascotas as $reg) {
             ?>
               <tr>
-                <td><img src="../images/<?php echo $reg["imagen"] ?>" alt=".." class="img-datatable"></td>
-                <td><span><?php echo $reg["nombre"] ?></span></td>
-                <td><span><?php echo $reg["edad"] ?></span></td>
-                <td><span><a style="color: black;" href="<?php echo $reg["url_raza"] ?>"><i class="bi bi-link-45deg"></i><?php echo $reg["raza"] ?></a></span></td>
+                <td><span><?php echo $pos; $pos++; ?></span></td>
+                <td id="pos_img<?php echo $reg['id_mas'] ?>"><img src="../images/<?php echo $reg["imagen"] ?>" alt=".." class="img-datatable"></td>
+                <td><span id="pos_n<?php echo $reg['id_mas'] ?>"><?php echo $reg["nombre"] ?></span></td>
+                <td><span id="pos_e<?php echo $reg['id_mas'] ?>">
+                  <?php echo floor(($reg['edad'] / 12))." Años y ".($reg['edad'] % 12)." meses"; ?>
+                </span></td>
+                <td><span id="pos_r<?php echo $reg['id_mas'] ?>"><a style="color: black;" href="<?php echo $reg["url_raza"] ?>"><i class="bi bi-link-45deg"></i><?php echo $reg["raza"] ?></a></span></td>
                 <td>
                   <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#exampleModal<?php echo $reg['id_mas'] ?>"><i class="bi bi-align-middle"></i></button>
 
@@ -67,8 +68,8 @@ if (isset($_POST['update'])) {
                       <h5 class="modal-title" id="exampleModalLabel<?php echo $reg['id_mas'] ?>">Comentarios</h5>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                      <span><?php echo $reg["comentarios"] ?></span>
+                    <div class="modal-body" >
+                      <span id="pos<?php echo $reg['id_mas'] ?>"><?php echo $reg["comentarios"] ?></span>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -125,11 +126,13 @@ if (isset($_POST['update'])) {
                 </div>
                 <div class="mb-3">
                   <label for="raza" class="form-label">Raza</label>
-                  <input class="form-control" list="raza" id="exampleDataList" placeholder="Escriba la Raza">
+                  <input class="form-control" list="raza" id="exampleDataList" name="raza" placeholder="Escriba la Raza">
                   <datalist id="raza" name="raza" >
-                    <?php foreach ($razas as $raza) { ?>
-                      <option value="<?php echo $raza["raza"] ?>"  ><span style="min-width: 500px; color: red"><?php echo $raza["raza"] ?></span></option>
-                    <?php } ?>
+                    <?php foreach ($razas as $raza) { 
+                      if($raza['estado_id'] == 1){
+                      ?>
+                      <option value="<?php echo $raza['raza'] ?>" >
+                    <?php }} ?>
                   </datalist>
                 </div>
                 <div class="mb-3">
@@ -159,32 +162,38 @@ if (isset($_POST['update'])) {
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabelA">Agregar Mascota</h5>
+              <h5 class="modal-title" id="exampleModalLabelA">Actualizar Mascota</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <form action="" method="post">
-                <div>
-                  <input type="hidden" name="id_mas" id="id_mas" value="<?php echo $reg["id_mas"] ?>">
-                </div>
+              <form method="POST" id="form_actualizar_mas">
                 <div class="mb-3">
-                  <label for="nombre" class="form-label">Nombre</label>
-                  <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese Nombre">
+                  <label for="id_mas" class="form-label">Id</label>
+                  <input type="text" class="form-control id_mas" disabled>
+                  <input type="hidden" class="form-control id_mas" name="id_mas_act" id="id_mas_act">
+                  <input type="hidden" class="form-control estado_id_mas" name="estado_id" id="estado_id">
+                </div>
+
+                <div class="mb-3">
+                  <label for="nombre_mas_act" class="form-label">Nombre</label>
+                  <input type="text" class="form-control nom_mas" name="nombre_mas_act" id="nombre_mas_act" placeholder="Ingrese Nombre">
                 </div>
                 <div class="mb-3">
                   <label for="edad" class="form-label">Edad</label>
                   <div class="row">
                     <div class="col-sm-3">
-                      <select class="form-select form-select-lg mb-3" name="edad-anio" id="edad-anio">
-                        <option selected>Años</option>
+                      <label for="edad_anio_mas_act" class="form-label">Años</label>
+                      <select class="form-select form-select-lg mb-3" name="edad_anio_mas_act" id="edad_anio_mas_act">
+                        <option selected class="e_anio_mas"></option>
                         <?php for ($a = 0; $a <= 20; $a++) { ?>
                           <option value="<?php echo $a ?>"><?php echo $a ?></option>
                         <?php } ?>
                       </select>
                     </div>
                     <div class="col-sm-3">
-                      <select class="form-select form-select-lg mb-3" name="edad-mes" id="edad-mes">
-                        <option selected>Meses</option>
+                      <label for="edad_mes_mas_act" class="form-label">Meses</label>
+                      <select class="form-select form-select-lg mb-3" name="edad_mes_mas_act" id="edad_mes_mas_act">
+                        <option selected class="e_mes_mas"></option>
                         <?php for ($a = 0; $a <= 12; $a++) { ?>
                           <option value="<?php echo $a ?>"><?php echo $a ?></option>
                         <?php } ?>
@@ -193,34 +202,37 @@ if (isset($_POST['update'])) {
                   </div>
                 </div>
                 <div class="mb-3">
-                  <label for="imagen" class="form-label">Imagen</label>
-                  <input type="file" class="form-control" name="imagen" id="imagen">
+                  <label for="imagen_mas_act" class="form-label">Imagen</label>
+                  <input type="file" class="form-control"  name="imagen_mas_act" id="imagen_mas_act">
                 </div>
+                
                 <div class="mb-3">
                   <label for="raza" class="form-label">Raza</label>
-                  <select class="form-select form-select-lg mb-3" name="raza" id="raza">
-                    <option selected>Seleccione una raza</option>
-                    <?php foreach ($razas as $raza) { ?>
-                      <option value="<?php echo $raza["id"] ?>"><?php echo $raza["raza"] ?></option>
-                    <?php } ?>
-                  </select>
+                  <input class="form-control raza_mas" list="raza1" id="raza_mas_act"  name="raza_mas_act" placeholder="Escriba la Raza">
+                  <datalist id="raza1" name="raza_mas_act">
+                    <?php foreach ($razas as $raza) { 
+                      if($raza['estado_id'] == 1){
+                    ?>
+                      <option value="<?php echo $raza['raza'] ?>" >
+                    <?php }} ?>
+                  </datalist>
                 </div>
                 <div class="mb-3">
-                  <label for="especie" class="form-label">Especie</label>
-                  <select class="form-select form-select-lg mb-3" name="especie" id="especie">
-                    <option selected>Seleccione una Especie</option>
+                  <label for="especie_mas_act" class="form-label">Especie</label>
+                  <select class="form-select form-select-lg mb-3" name="especie_mas_act" id="especie_mas_act">
+                    <option selected class="especie_mas"></option>
                     <?php foreach ($especies as $especie) { ?>
                       <option value="<?php echo $especie["id"] ?>"><?php echo $especie["especie"] ?></option>
                     <?php } ?>
                   </select>
                 </div>
                 <div class="mb-3">
-                  <label for="comentario" class="form-label">Comentarios</label>
-                  <textarea name="comentario" id="comentario" class="form-control" cols="30" rows="10"></textarea>
+                  <label for="comentario_mas_act" class="form-label">Comentarios</label>
+                  <textarea name="comentario_mas_act" id="comentario_mas_act" class="cmt_mas form-control" cols="10" rows="5"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-              <button type="submit" name="submit" class="btn btn-success">Enviar</button>
+              <button type="button"  class="btn btn-success btn-update">Enviar</button>
               </form>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>

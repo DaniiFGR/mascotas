@@ -8,7 +8,7 @@ $especies = $mascotasObj->mostrar_esp();
 if (isset($_POST['submit'])) {
   $mascotasObj->insertar_mas($_POST);
 }
-if (isset($_POST['update'])) {
+if (isset($_POST['actualizar'])) {
   $mascotasObj->actualizar_mas($_POST);
 }
 ?>
@@ -37,7 +37,8 @@ if (isset($_POST['update'])) {
             ?>
               <tr>
                 <td><span><?php echo $pos; $pos++; ?></span></td>
-                <td id="pos_img<?php echo $reg['id_mas'] ?>"><img src="../images/<?php echo $reg["imagen"] ?>" alt=".." class="img-datatable"></td>
+                <td id="pos_img<?php echo $reg['id_mas'] ?>">
+                <img class="img-datatable" alt="..." src="data:<?php echo $reg['tipo']; ?>;base64,<?php echo  base64_encode($reg['imagen']); ?>">
                 <td><span id="pos_n<?php echo $reg['id_mas'] ?>"><?php echo $reg["nombre"] ?></span></td>
                 <td><span id="pos_e<?php echo $reg['id_mas'] ?>">
                   <?php echo floor(($reg['edad'] / 12))." Años y ".($reg['edad'] % 12)." meses"; ?>
@@ -91,7 +92,7 @@ if (isset($_POST['update'])) {
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body container" style="padding: 10px 50px 20px 50px;">
-              <form action="" method="post">
+              <form action="" method="post" enctype="multipart/form-data">
                 <div>
                   <input type="hidden" name="id_mas" id="id_mas" value="<?php echo $reg["id_mas"] ?>">
                 </div>
@@ -122,7 +123,7 @@ if (isset($_POST['update'])) {
                 </div>
                 <div class="mb-3">
                   <label for="imagen" class="form-label">Imagen</label>
-                  <input type="file" class="form-control" name="imagen" id="imagen">
+                  <input type="file" class="form-control" name="foto" id="foto">
                 </div>
                 <div class="mb-3">
                   <label for="raza" class="form-label">Raza</label>
@@ -166,7 +167,7 @@ if (isset($_POST['update'])) {
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <form method="POST" id="form_actualizar_mas">
+              <form method="POST" id="form_actualizar_mas" enctype="multipart/form-data">
                 <div class="mb-3">
                   <label for="id_mas" class="form-label">Id</label>
                   <input type="text" class="form-control id_mas" disabled>
@@ -205,7 +206,6 @@ if (isset($_POST['update'])) {
                   <label for="imagen_mas_act" class="form-label">Imagen</label>
                   <input type="file" class="form-control"  name="imagen_mas_act" id="imagen_mas_act">
                 </div>
-                
                 <div class="mb-3">
                   <label for="raza" class="form-label">Raza</label>
                   <input class="form-control raza_mas" list="raza1" id="raza_mas_act"  name="raza_mas_act" placeholder="Escriba la Raza">
@@ -232,7 +232,7 @@ if (isset($_POST['update'])) {
                 </div>
             </div>
             <div class="modal-footer">
-              <button type="button"  class="btn btn-success btn-update">Enviar</button>
+              <button type="submit" name="actualizar"  class="btn btn-success ">Enviar</button>
               </form>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>

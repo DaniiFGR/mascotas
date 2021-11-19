@@ -7,9 +7,56 @@ class Mascotas
 	{
 		$this->con = new mysqli("127.0.0.1", "root", "1234", "adopcion");
 		if (mysqli_connect_error()) {
-			echo ("Existe un error: ".$this->conn->connect_error);
+			echo ("Existe un error: " . $this->conn->connect_error);
 		} else {
 			return $this->con;
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////Imagenes
+	public function sub_imagenes()
+	{
+		if (isset($_FILES['foto']['name'])) {
+			$tipoArchivo = $_FILES['foto']['type'];
+			$nombreArchivo = $_FILES['foto']['name'];
+			$tamanoArchivo = $_FILES['foto']['size'];
+			$imagenSubida = fopen($_FILES['foto']['tmp_name'], 'r');
+			$binariosImagen = fread($imagenSubida, $tamanoArchivo);
+			// $binariosImagen = $this->con->escape_string($binariosImagen);
+			$binariosImagen = mysqli_escape_string($this->con, $binariosImagen);
+
+			$query = "INSERT INTO imagenes (nombre, imagen, tipo) VALUES('$nombreArchivo','$binariosImagen','$tipoArchivo')";
+			$result = $this->con->query($query);
+			if ($result) {
+				echo "Correcto";
+			} else {
+				echo mysqli_error($this->con);
+			}
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	public function mostrar_img()
+	{
+		$SQL = "SELECT nombre, imagen, tipo FROM imagenes";
+		$result = $this->con->query($SQL);
+		if ($result->num_rows >= 0) {
+			$data = array();
+			while ($row = $result->fetch_assoc()) {
+				$data[] = $row;
+			}
+			return $data;
+		} else {
+			echo "Error al realizar consulta:";
+		}
+	}
+	public function mostrar_una_img($id)
+	{
+		$query = "SELECT imagen, tipo FROM imagenes WHERE id = '$id'";
+		$result = $this->con->query($query);
+		if ($result->num_rows > 0) {
+			$row = $result->fetch_assoc();
+			return $row;
+		} else {
+			echo "error: " . mysqli_error($this->con);;
 		}
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////////Contador
@@ -27,16 +74,17 @@ class Mascotas
 			echo "Error al realizar consulta:";
 		}
 	}
-	
+
 	##================================================================================================Mostrar mascotas
 	public function mostrar()
 	{
-		$SQL = "SELECT mascota.id as id_mas,nombre,edad,imagen,comentarios,raza,raza.url as url_raza,especie,estado_mas,estado
+		$SQL = "SELECT mascota.id as id_mas,mascota.nombre,edad,imagen,imagen_id,tipo,comentarios,raza,raza.url as url_raza,especie,estado_mas,estado
 				  FROM mascota
 					JOIN raza on mascota.raza_id = raza.id
 					JOIN especie ON mascota.especie_id = especie.id
 					JOIN estado_mascota ON mascota.estado_mascota_id = estado_mascota.id
 					JOIN estado_elemento ON mascota.estado_elemento_id = estado_elemento.id
+					JOIN imagenes ON mascota.imagen_id = imagenes.id
 					ORDER BY id_mas";
 		$result = $this->con->query($SQL);
 		if ($result->num_rows >= 0) {
@@ -95,7 +143,7 @@ class Mascotas
 		$result = $this->con->query($SQL);
 		if ($result->num_rows >= 0) {
 			while ($row = $result->fetch_assoc()) {
-				if($identificacion == $row['identificacion']){
+				if ($identificacion == $row['identificacion']) {
 					$bandera = 1;
 					$data = $row['id'];
 				}
@@ -104,7 +152,7 @@ class Mascotas
 			echo "Error al realizar consulta:";
 		}
 		echo $data;
-		if($bandera == 0){
+		if ($bandera == 0) {
 			$query = "INSERT INTO usuario(id, identificacion, nombre, apellido, telefono, correo, direccion, rol_id, estado_elemento_id) VALUES('$id','$identificacion','$nombre','$apellido','$telefono','$correo','$direccion','$rol','$estado')";
 			$sql = $this->con->query($query);
 			if ($sql == true) {
@@ -112,7 +160,7 @@ class Mascotas
 			} else {
 				echo "Registro fallo";
 			}
-		}else{
+		} else {
 			$id = $data;
 		}
 		$query = "SELECT id as id_sol FROM solicitud order by id_sol desc limit 1";
@@ -146,9 +194,6 @@ class Mascotas
 		} else {
 			echo "No encontrado";
 		}
-
-
-		
 	}
 	public function mostrar_raza()
 	{
@@ -182,10 +227,10 @@ class Mascotas
 		$result = $this->con->query($SQL);
 		if ($result->num_rows > 0) {
 			$bandera = 1;
-		}else {
+		} else {
 			echo "Error al realizar consulta:";
 		}
-		if($bandera == 0){
+		if ($bandera == 0) {
 			$query = "INSERT INTO raza(id, raza, url, estado_id) VALUES('$id','$nombre','$url','$estado')";
 			$sql = $this->con->query($query);
 			if ($sql == true) {
@@ -217,7 +262,7 @@ class Mascotas
 				})
 				</script>";
 			}
-		}else{
+		} else {
 			echo "<script type='text/javascript'>
 				Swal.fire({
 					title: 'Error',
@@ -288,7 +333,7 @@ class Mascotas
 		if ($result->num_rows > 0) {
 			$band = 1;
 		}
-		if($band == 0){
+		if ($band == 0) {
 			if (!empty($id) && !empty($postData)) {
 				$query = "UPDATE raza SET raza = '$nombre', url = '$url' WHERE id = '$id'";
 				$sql = $this->con->query($query);
@@ -305,7 +350,7 @@ class Mascotas
 					echo "no";
 				}
 			}
-		}else{
+		} else {
 			echo "error";
 		}
 	}
@@ -333,56 +378,82 @@ class Mascotas
 			$id += 1;
 		}
 		$nombre = $this->con->real_escape_string($_POST['nombre']);
-		$imagen = $this->con->real_escape_string($_POST['imagen']);
 		$raza = $this->con->real_escape_string($_POST['raza']);
 		$especie = $this->con->real_escape_string($_POST['especie']);
 		$comentario = $this->con->real_escape_string($_POST['comentario']);
 		$estado_mas = 1;
 		$estado_ele = 1;
 		$edad = (($_POST['edad-anio']) * 12) + ($_POST['edad-mes']);
-
+		$imagen = 0;
 		////////////////////////////////////////////////////////////
 		$SQL = "SELECT id, raza FROM raza";
 		$result = $this->con->query($SQL);
 		if ($result->num_rows >= 0) {
 			$data = array();
 			while ($row = $result->fetch_assoc()) {
-				if($row['raza'] == $raza){
-					$raza_mas=$row['id'];
+				if ($row['raza'] == $raza) {
+					$raza_mas = $row['id'];
 				}
 			}
 		} else {
 			echo "Error al realizar consulta:";
 		}
 		////////////////////////////////////////////////////////////
-		$query = "INSERT INTO mascota(id, nombre, edad, imagen, raza_id, especie_id, estado_mascota_id, Comentarios, estado_elemento_id) VALUES('$id','$nombre','$edad','$imagen','$raza_mas','$especie','$estado_mas','$comentario','$estado_ele')";
-		$sql = $this->con->query($query);
-		if ($sql == true) {
-			echo "<script type='text/javascript'>
-						Swal.fire({
-							title: 'Correcto',
-							text: 'Su solicitud se agrego con exito',
-							icon: 'warning',
-							showCancelButton: true,
-							confirmButtonColor: '#3085d6',
-							cancelButtonColor: '#d33',
-							confirmButtonText: 'Correcto'
-						}).then((result) => {
-								document.location.href = './form-mascotas.php';
-						})
-						</script>";
-		} else {
-			echo "Registro fallo";
+		if (isset($_FILES['foto']['name'])) {
+			$tipoArchivo = $_FILES['foto']['type'];
+			$nombreArchivo = $_FILES['foto']['name'];
+			$tamanoArchivo = $_FILES['foto']['size'];
+			$imagenSubida = fopen($_FILES['foto']['tmp_name'], 'r');
+			$binariosImagen = fread($imagenSubida, $tamanoArchivo);
+			// $binariosImagen = $this->con->escape_string($binariosImagen);
+			$binariosImagen = mysqli_escape_string($this->con, $binariosImagen);
+			$nombreArchivo = "img_" . $id;
+			$query = "INSERT INTO imagenes (nombre, imagen, tipo) VALUES('$nombreArchivo','$binariosImagen','$tipoArchivo')";
+			$result = $this->con->query($query);
+			if ($result) {
+				$val = 'Correcto imagen';
+				$query = "SELECT id FROM imagenes WHERE nombre = '$nombreArchivo'";
+				$result = $this->con->query($query);
+				if ($result->num_rows > 0) {
+					$row = $result->fetch_assoc();
+					$imagen = $row['id'];
+					////////////////////////////////////////////////////////////
+					$query = "INSERT INTO mascota(id, nombre, edad, imagen_id, raza_id, especie_id, estado_mascota_id, Comentarios, estado_elemento_id) VALUES('$id','$nombre','$edad','$imagen','$raza_mas','$especie','$estado_mas','$comentario','$estado_ele')";
+					$sql = $this->con->query($query);
+					if ($sql == true) {
+						echo "<script type='text/javascript'>
+									Swal.fire({
+										title: 'Correcto',
+										text: 'Su solicitud se agrego con exito',
+										icon: 'Success',
+										showCancelButton: true,
+										confirmButtonColor: '#3085d6',
+										cancelButtonColor: '#d33',
+										confirmButtonText: 'Correcto'
+									}).then((result) => {
+											document.location.href = './form-mascotas.php';
+									})
+									</script>";
+					} else {
+						echo "Registro fallo: " . $imagen . ' Error:' . mysqli_error($this->con);
+					}
+				} else {
+					echo "error: " . mysqli_error($this->con);;
+				}
+			} else {
+				echo mysqli_error($this->con);
+			}
 		}
 	}
 	public function mostrar_uno($id)
 	{
-		$SQL = "SELECT mascota.id as id_mas,nombre,edad,imagen,comentarios,raza,raza.url as url_raza,especie,estado_mas,estado_mascota_id,mascota.estado_elemento_id,estado,especie_id,raza_id
+		$SQL = "SELECT mascota.id as id_mas,mascota.nombre,edad,imagen_id,comentarios,raza,raza.url as url_raza,especie,estado_mas,estado_mascota_id,mascota.estado_elemento_id,estado,especie_id,raza_id
 				  FROM mascota
 					JOIN raza on mascota.raza_id = raza.id
 					JOIN especie ON mascota.especie_id = especie.id
 					JOIN estado_mascota ON mascota.estado_mascota_id = estado_mascota.id
 					JOIN estado_elemento ON mascota.estado_elemento_id = estado_elemento.id
+					JOIN imagenes ON mascota.imagen_id = imagenes.id
 					WHERE mascota.id = $id";
 		$result = $this->con->query($SQL);
 		if ($result->num_rows >= 0) {
@@ -395,62 +466,86 @@ class Mascotas
 
 	public function actualizar_mas($postData)
 	{
-		$id = $this->con->real_escape_string($postData['id_mas']);
-		$nombre = $this->con->real_escape_string($postData['nombre']);
-		$imagen = $this->con->real_escape_string($postData['imagen']);
-		$raza = $this->con->real_escape_string($postData['raza']);
-		$especie = $this->con->real_escape_string($postData['especie']);
-		$comentario = $this->con->real_escape_string($postData['comentarios']);
+		$id = $this->con->real_escape_string($_POST['id_mas_act']);
+		$nombre = $this->con->real_escape_string($_POST['nombre_mas_act']);
+		$imagen = $this->con->real_escape_string($_POST['imagen_mas_act']);
+		$raza = $this->con->real_escape_string($_POST['raza_mas_act']);
+		$especie = $this->con->real_escape_string($_POST['especie_mas_act']);
+		$comentario = $this->con->real_escape_string($_POST['comentario_mas_act']);
 		$estado_mas = 1;
-		$estado_ele = $this->con->real_escape_string($postData['estado']);
+		$estado_ele = $this->con->real_escape_string($_POST['estado_id']);
 		////////////////////////////////////////////////////////////
-		if($imagen == ''){
-			$SQL = "SELECT imagen FROM mascota WHERE mascota.id = $id";
-			$result = $this->con->query($SQL);
-			if ($result->num_rows > 0) {
-				$row = $result->fetch_assoc();
-				$imagen = $row['imagen'];
-			}
+		$SQL = "SELECT imagen_id FROM mascota WHERE mascota.id = $id";
+		$result = $this->con->query($SQL);
+		if ($result->num_rows > 0) {
+			$row = $result->fetch_assoc();
 		}else{
-			$imagen = $imagen;
+			echo "no encontro imagen: ".mysqli_error($this->con);
 		}
-		////////////////////////////////////////////////////////////
+		$id_img = $row['imagen_id'];
+		if (($_FILES['imagen_mas_act']['name']) == '') {
+			$imagen = $id_img;
+		} else {
+			if (isset($_FILES['imagen_mas_act']['name'])) {
+				$tipoArchivo = $_FILES['imagen_mas_act']['type'];
+				$nombreArchivo = $_FILES['imagen_mas_act']['name'];
+				$tamanoArchivo = $_FILES['imagen_mas_act']['size'];
+				$imagenSubida = fopen($_FILES['imagen_mas_act']['tmp_name'], 'r');
+				$binariosImagen = fread($imagenSubida, $tamanoArchivo);
+				// $binariosImagen = $this->con->escape_string($binariosImagen);
+				$binariosImagen = mysqli_escape_string($this->con, $binariosImagen);
+				$nombreArchivo = "img_act" . $id;
+				$query = "INSERT INTO imagenes (nombre, imagen, tipo) VALUES('$nombreArchivo','$binariosImagen','$tipoArchivo')";
+				$result = $this->con->query($query);
+				if ($result) {
+					$SQL = "SELECT id FROM imagenes WHERE nombre = '$nombreArchivo' ORDER BY id DESC LIMIT 1";
+					$result = $this->con->query($SQL);
+					if ($result->num_rows > 0) {
+						$img = $result->fetch_assoc();
+						$imagen = $img['id'];
+					}else{
+						echo "no encontro id de img: ".mysqli_error($this->con);
+					}
+				}else{
+					echo "No Actualizo imagen: ".mysqli_error($this->con);
+				}
+			}
+		}
 		$SQL = "SELECT id, raza FROM raza";
 		$result = $this->con->query($SQL);
 		if ($result->num_rows >= 0) {
 			$data = array();
 			while ($row = $result->fetch_assoc()) {
-				if($row['raza'] == $raza){
-					$raza_mas=$row['id'];
+				if ($row['raza'] == $raza) {
+					$raza_mas = $row['id'];
 				}
 			}
 		} else {
 			echo "Error al realizar consulta:";
 		}
-		////////////////////////////////////////////////////////////
-		$edad = (($postData['anio']) * 12) + ($postData['mes']);
+		$edad = (($_POST['edad_anio_mas_act']) * 12) + ($_POST['edad_mes_mas_act']);
 		if (!empty($id) && !empty($postData)) {
-			$query = "UPDATE mascota SET nombre = '$nombre', edad = '$edad', imagen = '$imagen', raza_id = '$raza_mas', especie_id = '$especie', Comentarios = '$comentario' WHERE id = '$id'";
+			$query = "UPDATE mascota SET nombre = '$nombre', edad = '$edad', imagen_id = '$imagen', raza_id = '$raza_mas', especie_id = '$especie', Comentarios = '$comentario' WHERE id = '$id'";
 			$sql = $this->con->query($query);
 			if ($sql == true) {
-				$SQL = "SELECT mascota.id as id_mas,nombre,edad,imagen,comentarios,raza,raza.url as url_raza,especie,estado_mas,estado_mascota_id,mascota.estado_elemento_id,estado,especie_id,raza_id
-				  FROM mascota
-					JOIN raza on mascota.raza_id = raza.id
-					JOIN especie ON mascota.especie_id = especie.id
-					JOIN estado_mascota ON mascota.estado_mascota_id = estado_mascota.id
-					JOIN estado_elemento ON mascota.estado_elemento_id = estado_elemento.id
-					WHERE mascota.id = $id";
-				$result = $this->con->query($SQL);
-				if ($result->num_rows >= 0) {
-					$row = $result->fetch_assoc();
-					echo json_encode($row);
-				} else {
-					echo "Error al realizar consulta:";
-				}
+				echo "<script type='text/javascript'>
+									Swal.fire({
+										title: 'Correcto',
+										text: 'Se actualizo con exito',
+										icon: 'Success',
+										showCancelButton: true,
+										confirmButtonColor: '#3085d6',
+										cancelButtonColor: '#d33',
+										confirmButtonText: 'Correcto'
+									}).then((result) => {
+											document.location.href = './form-mascotas.php';
+									})
+									</script>";
 			} else {
-				echo "no";
+				echo "no se actualizo mascota: ".mysqli_error($this->con);;
 			}
 		}
+		echo "finalizo";
 	}
 
 	public function eliminar($id)
@@ -490,8 +585,8 @@ if (isset($_POST['elim'])) {
 if (isset($_POST['actu'])) {
 	$mascotasObj->mostrar_uno($_POST['actu']);
 }
-if (isset($_POST['updt'])) {
-  $mascotasObj->actualizar_mas($_POST);
+if (isset($_POST['cadena'])) {
+	$mascotasObj->actualizar_mas($_POST);
 }
 //////////////////////////////////Raza
 if (isset($_POST['elim_raza'])) {
@@ -501,5 +596,5 @@ if (isset($_POST['actu_raza'])) {
 	$mascotasObj->mostrar_uno_raza($_POST['actu_raza']);
 }
 if (isset($_POST['updt_raza'])) {
-  $mascotasObj->actualizar_raza($_POST);
+	$mascotasObj->actualizar_raza($_POST);
 }

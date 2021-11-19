@@ -2,7 +2,7 @@
     include '../navbar.php';
     include '../procesar.php';
     $usuariosObj = new Mascotas();
-    $usuarios = $usuariosObj->mostrar_usu();
+    $imagen = $mascotasObj->mostrar_una_img($_POST["img"]);
     if(isset($_POST['submit'])) {
       $usuariosObj->insertar_usu($_POST);
     }
@@ -14,7 +14,7 @@
         <div class="col-sm-6 info-mascota">
           <div class="tarjeta">
             <div class="card transparencia" style="width: 90%;">
-              <img src="../images/<?php echo $_POST["img"]?>" class="card-img-top" alt="...">
+              <img class="card-img-top" alt="..." src="data:<?php echo $imagen['tipo']; ?>;base64,<?php echo  base64_encode($imagen['imagen']); ?>">
               <div class="card-body">
                 <h5 class="card-title"><?php echo $_POST["nombre"]?></h5>
                 <p class="card-text"><?php echo $_POST["cmt"]?></p>

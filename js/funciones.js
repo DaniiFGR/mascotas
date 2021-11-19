@@ -129,7 +129,6 @@ $(document).ready(() => {
           let mes = edad % 12
           $(".e_anio_mas").text(Math.trunc(anio));
           $(".e_mes_mas").text(Math.trunc(mes));
-          $(".img_mas").text(items['imagen']);
         }, esperar);
       },
       error: function () {
@@ -147,32 +146,18 @@ $(document).ready(() => {
     fic = img.split('\\');
     fic = fic[fic.length-1];
     console.log("imagen", img)
-    console.log("posicion: ",pos);
+    console.log("posicionnn: ",pos);
+    var cadena = $('#form_actualizar_mas').serializeArray();
+    console.log('cadena:', cadena);
     $.ajax({
       type: "POST",
-      data: {"updt": 1, "id_mas": $("#id_mas_act").val(),"nombre": $("#nombre_mas_act").val(),"anio": $("#edad_anio_mas_act").val(),"mes": $("#edad_mes_mas_act").val(), "imagen": fic, "raza": $("#raza_mas_act").val(), "especie": $("#especie_mas_act").val(),"comentarios": $("#comentario_mas_act").val(), "estado": $("#estado_id").val()},
-      // data: $("#form_actualizar_mas").serialize(),
+      // data: {"updt": 1, "id_mas": $("#id_mas_act").val(),"nombre": $("#nombre_mas_act").val(),"anio": $("#edad_anio_mas_act").val(),"mes": $("#edad_mes_mas_act").val(), "imagen": fic, "raza": $("#raza_mas_act").val(), "especie": $("#especie_mas_act").val(),"comentarios": $("#comentario_mas_act").val(), "estado": $("#estado_id").val()},
+      data: {'cadena': cadena},
       url: "../procesar.php",
-      dataType: "json",
+      dataType: 'json',
       success: function (datos) {
         setTimeout(function () {
-          var items = [];
-          $.each( (datos), function( key, val ) {
-            items[key]=val;
-          });
-          console.log(items)
-          Swal.fire(
-            'Correcto',
-            'Se Actualizo correctamente',
-            'success'
-          );
-          document.getElementById("pos_n"+pos).innerHTML = items['nombre'];
-          document.getElementById("pos_e"+pos).innerHTML = Math.trunc((items['edad'])/12)+" Años y "+Math.trunc((items['edad'])%12)+" meses";
-          document.getElementById("pos_img"+pos).innerHTML = "<img src='../images/"+items['imagen']+"' alt='..' class='img-datatable'>";
-          document.getElementById("pos_r"+pos).innerHTML = "<a style='color: black;' href='"+items['url_raza']+"'><i class='bi bi-link-45deg'></i>"+items['raza']+"</a>";
-          let s_pos="#pos"+pos;
-          console.log(s_pos);
-          document.getElementById("pos"+pos).innerHTML = items['comentarios'];
+            console.log(datos);
         }, esperar);
       },
       error: function () {

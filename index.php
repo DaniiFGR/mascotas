@@ -54,6 +54,7 @@
             <li><a href="#clients">Patrocinadores</a></li>
             <li><a href="#price">Padrinos</a></li>
             <li><a href="#contact">Contactenos</a></li>
+            <li><a href="formularios/form-mascotas.php">Agregar mascota</a></li>
           </ul>
         </div>
         <!-- End main navigation -->
@@ -198,7 +199,7 @@
         ?>
           <div id="<?php echo $reg["id_mas"]?>" class="toggleDiv row-fluid single-project listado">
             <div class="span6">
-              <img class="img-info" src="images/<?php echo $reg["imagen"]?>" alt="..." />
+            <img class="img-info" alt="..." src="data:<?php echo $reg['tipo']; ?>;base64,<?php echo  base64_encode($reg['imagen']); ?>">
             </div>
             <div class="span6">
               <div class="project-description">
@@ -220,7 +221,6 @@
                   </div>
                   <div class="espacio">
                     <span><h4>Solicitudes</h4></span><?php if($band != 0) echo "$band <i class='bi bi-suit-heart'></i>"?>
-                    
                   </div>
                   <div class="espacio">
                     <span><h4>Comentarios</h4></span>
@@ -228,7 +228,7 @@
                   </div>
                   <div class="btn-adopcion">
                     <button class="btn btn-warning btn-informacion" id="btn-info" data-direc="<?php echo $reg['url_raza']?>">Información</button>
-                    <button class="btn btn-info btn-adop" data-id="<?php echo $reg['id_mas']?>" data-nombre="<?php echo $reg['nombre']?>"  data-edad="<?php echo $reg['edad']?>" data-raza="<?php echo $reg['raza']?>" data-cmt="<?php echo $reg['comentarios']?>" data-img="<?php echo $reg['imagen']?>" data-direc="<?php echo $reg['url_raza']?>">Adoptar</button>
+                    <button class="btn btn-info btn-adop" data-id="<?php echo $reg['id_mas']?>" data-nombre="<?php echo $reg['nombre']?>"  data-edad="<?php echo $reg['edad']?>" data-raza="<?php echo $reg['raza']?>" data-cmt="<?php echo $reg['comentarios']?>" data-img="<?php echo $reg['imagen_id']?>" data-direc="<?php echo $reg['url_raza']?>">Adoptar</button>
                   </div>
                 </div>
                 <p></p>
@@ -250,7 +250,8 @@
             ?>
               <li class="span4 mix <?php echo $reg['especie']?>">
                 <div class="thumbnail">
-                  <img src="images/<?php echo $reg["imagen"]?>" alt="..." class="img-afuera">
+                <img class="img-afuera" alt="..." src="data:<?php echo $reg['tipo']; ?>;base64,<?php echo  base64_encode($reg['imagen']); ?>">
+                  
                   <a href="#single-project" class="more show_hide" rel="#<?php echo $reg["id_mas"]?>">
                     <i class="icon-plus"></i>
                   </a>

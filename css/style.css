@@ -36,7 +36,6 @@ body {
     line-height: 1.2em;
     font-size: 17px;
     line-height: 20px;
-    
 }
 
 a {
@@ -1324,4 +1323,7 @@ a {
 }
 .correo-div{
     color: white !important;
+}
+.altura{
+    height: 350px;
 }

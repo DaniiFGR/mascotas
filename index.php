@@ -237,7 +237,7 @@
           </div>
         <?php }?>
           <ul id="portfolio-grid" class="thumbnails row">
-            <?php
+          <?php
               foreach ($mascotas as $reg) {
                 if($reg['estado'] == 'Activo'){
                   $band = 0;
@@ -248,10 +248,9 @@
                     }
                   }
             ?>
-              <li class="span4 mix <?php echo $reg['especie']?>">
+              <li class="span4 mix altura <?php echo $reg['especie']?>">
                 <div class="thumbnail">
                 <img class="img-afuera" alt="..." src="data:<?php echo $reg['tipo']; ?>;base64,<?php echo  base64_encode($reg['imagen']); ?>">
-                  
                   <a href="#single-project" class="more show_hide" rel="#<?php echo $reg["id_mas"]?>">
                     <i class="icon-plus"></i>
                   </a>

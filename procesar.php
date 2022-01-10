@@ -5,7 +5,7 @@ class Mascotas
 
 	public function __construct()
 	{
-		$this->con = new mysqli("127.0.0.1", "root", "1234", "adopcion");
+		$this->con = new mysqli("127.0.0.1", "root", "", "adopcion");
 		if (mysqli_connect_error()) {
 			echo ("Existe un error: " . $this->conn->connect_error);
 		} else {
